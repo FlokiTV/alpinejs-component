@@ -39,7 +39,7 @@ export default function (Alpine) {
       }
 
       if (urlName.length) {
-        initUrl(Alpine, urlName, root)
+        initUrl(Alpine, (window.xComponent?.urlPrefix || '') + urlName, root)
       }
 
       if (styleNames.length) {
