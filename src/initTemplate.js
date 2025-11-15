@@ -50,12 +50,11 @@ export async function initUrl(Alpine, urlName, shadowDom) {
 
   const scripts = Array.from(newDocument.querySelectorAll('script'))
   scripts.forEach((s) => s.remove())
+  runScriptsInOrder(scripts)
 
   const newComponent = newDocument.body.firstChild
 
   shadowDom.appendChild(newComponent)
 
   Alpine.initTree(shadowDom)
-
-  runScriptsInOrder(scripts)
 }
