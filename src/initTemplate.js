@@ -1,22 +1,44 @@
+function runScriptsInOrder(scripts) {
+  ;(function runScript(i) {
+    if (i >= scripts.length) return
+
+    const old = scripts[i]
+    const js = document.createElement('script')
+
+    for (let { name, value } of Array.from(old.attributes)) {
+      js.setAttribute(name, value)
+    }
+
+    if (old.src) {
+      js.async = false
+      js.onload = () => runScript(i + 1)
+      document.head.appendChild(js)
+    } else {
+      js.textContent = old.textContent
+      document.head.appendChild(js)
+      runScript(i + 1)
+    }
+  })(0)
+}
+
 export async function initTemplate(Alpine, templateName, shadowDom) {
-  function generateComponent(targetHtml) {
-    const htmlTemplate = document.getElementById(targetHtml)
+  const htmlTemplate = document.getElementById(templateName)
 
-    const domParser = new DOMParser()
+  const scripts = Array.from(htmlTemplate.content.querySelectorAll('script'))
+  scripts.forEach((s) => s.remove())
 
-    const newComponent = domParser.parseFromString(
-      htmlTemplate.innerHTML,
-      'text/html'
-    ).body.firstChild
+  const domParser = new DOMParser()
 
-    return Promise.resolve(newComponent)
-  }
+  const newComponent = domParser.parseFromString(
+    htmlTemplate.innerHTML,
+    'text/html'
+  ).body.firstChild
 
-  const alpineComponent = await generateComponent(templateName)
-
-  shadowDom.appendChild(alpineComponent)
+  shadowDom.appendChild(newComponent)
 
   Alpine.initTree(shadowDom)
+
+  runScriptsInOrder(scripts)
 }
 
 export async function initUrl(Alpine, urlName, shadowDom) {
@@ -25,10 +47,16 @@ export async function initUrl(Alpine, urlName, shadowDom) {
 
   const domParser = new DOMParser()
 
-  const newComponent = domParser.parseFromString(htmlTemplate, 'text/html').body
-    .firstChild
+  const newDocument = domParser.parseFromString(htmlTemplate, 'text/html')
+
+  const scripts = Array.from(newDocument.querySelectorAll('script'))
+  scripts.forEach((s) => s.remove())
+
+  const newComponent = newDocument.body.firstChild
 
   shadowDom.appendChild(newComponent)
 
   Alpine.initTree(shadowDom)
+
+  runScriptsInOrder(scripts)
 }
