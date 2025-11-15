@@ -10,7 +10,12 @@ export default function (Alpine) {
         return
       }
 
-      const shadowDom = this.attachShadow({ mode: 'open' })
+      let useShadow = window.xComponent?.useShadow ?? false
+      if (this.hasAttribute('use-shadow')) {
+        useShadow = this.getAttribute('use-shadow') === 'true'
+      }
+
+      const root = useShadow ? this.attachShadow({ mode: 'open' }) : this
 
       const hasDynamicTemplate = this.hasAttribute(':template')
       const hasDynamicUrl = this.hasAttribute(':url')
@@ -30,15 +35,15 @@ export default function (Alpine) {
       const styleNames = componentStyles?.value.split(',') || ''
 
       if (templateName.length) {
-        initTemplate(Alpine, templateName, shadowDom)
+        initTemplate(Alpine, templateName, root)
       }
 
       if (urlName.length) {
-        initUrl(Alpine, urlName, shadowDom)
+        initUrl(Alpine, urlName, root)
       }
 
       if (styleNames.length) {
-        initStyles(shadowDom, styleNames)
+        initStyles(root, styleNames)
       }
 
       this._hasInit = true
