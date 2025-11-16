@@ -25,7 +25,6 @@ export async function initTemplate(Alpine, templateName, shadowDom) {
   const htmlTemplate = document.getElementById(templateName)
 
   const scripts = Array.from(htmlTemplate.content.querySelectorAll('script'))
-  scripts.forEach((s) => s.remove())
   runScriptsInOrder(scripts)
 
   const domParser = new DOMParser()
